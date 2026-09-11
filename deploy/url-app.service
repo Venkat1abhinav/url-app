@@ -1,0 +1,15 @@
+[Unit]
+Description=URL App Podman Compose stack
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/opt/url-app
+ExecStart=/usr/bin/podman compose --profile production up -d
+ExecStop=/usr/bin/podman compose --profile production down
+TimeoutStartSec=0
+
+[Install]
+WantedBy=multi-user.target
