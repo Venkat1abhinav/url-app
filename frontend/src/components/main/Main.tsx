@@ -72,7 +72,7 @@ const Main = () => {
           <h2 className="text-4xl font-semibold tracking-tight text-white sm:text-5xl">Links that travel lighter.</h2>
           <p className="mt-5 text-base leading-7 text-slate-400 sm:text-lg">Create clean, memorable links for everything you share. Add an optional expiry when a link only needs to live for a while.</p>
           <div className="mt-8 grid grid-cols-3 gap-3 text-sm">
-            {[['Fast', 'Create in seconds'], ['Private', 'No sign-up needed'], ['Flexible', 'Set an expiry']].map(([title, detail]) => <div key={title} className="rounded-xl border border-white/7 bg-white/[0.025] p-3"><p className="font-medium text-slate-200">{title}</p><p className="mt-1 text-xs leading-5 text-slate-500">{detail}</p></div>)}
+            {[['Fast', 'Create in seconds'], ['Private', 'No sign-up needed'], ['Flexible', 'Set an expiry']].map(([title, detail]) => <div key={title} className="rounded-xl border border-white/7 bg-white/2.5 p-3"><p className="font-medium text-slate-200">{title}</p><p className="mt-1 text-xs leading-5 text-slate-500">{detail}</p></div>)}
           </div>
         </section>
 
@@ -93,3 +93,4 @@ const Main = () => {
 }
 
 export default Main
+
