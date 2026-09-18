@@ -23,6 +23,7 @@ func main() {
 	r := chi.NewRouter()
 
 	r.Use(middleware.RequestID)
+	//nolint:staticcheck // chi middleware.RealIP is intentionally used.
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
@@ -58,8 +59,8 @@ func main() {
 	})
 	// Pass the initialized model to the handler
 
-	r.Post("/api/urls", handler.CreateShortUrl(app))
-	r.Get("/{hash}", handler.RedirectUrl(app))
+	r.Post("/api/urls", handler.CreateShortURL(app))
+	r.Get("/{hash}", handler.RedirectURL(app))
 
 	addr := env("APP_ADDR", ":4000")
 	server := &http.Server{

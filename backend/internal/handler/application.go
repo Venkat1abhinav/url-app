@@ -1,29 +1,32 @@
+// Package handler implementation
 package handler
 
 import (
 	"context"
 	"errors"
+	"log/slog"
 	"time"
 
 	"github.com/foolxdev/url-shortener/internal/model"
 	"github.com/foolxdev/url-shortener/internal/service"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type UrlModel struct {
+type URLModel struct {
 	DB *pgxpool.Pool
 }
 
 type Application struct {
-	UrlModel *UrlModel
+	URLModel *URLModel
 }
 
 var errExpired = errors.New("short URL has expired")
 
 func NewApplication(db *pgxpool.Pool) *Application {
 	return &Application{
-		UrlModel: &UrlModel{
+		URLModel: &URLModel{
 			DB: db,
 		},
 	}
@@ -32,15 +35,17 @@ func NewApplication(db *pgxpool.Pool) *Application {
 func (app *Application) Insert(
 	u model.UrlCreate,
 ) (model.Url, error) {
-
 	ctx := context.Background()
 
-	tx, err := app.UrlModel.DB.Begin(ctx)
-
+	tx, err := app.URLModel.DB.Begin(ctx)
 	if err != nil {
 		return model.Url{}, err
 	}
-	defer tx.Rollback(ctx)
+	defer func() {
+		if err := tx.Rollback(ctx); err != nil && !errors.Is(err, pgx.ErrTxClosed) {
+			slog.Error("failed to rollback transaction", "error", err)
+		}
+	}()
 
 	// Ask PostgreSQL for the next ID instead of depending on a particular
 	// sequence name. Sequence names differ across existing deployments and
@@ -64,13 +69,11 @@ func (app *Application) Insert(
 	`
 
 	err = tx.QueryRow(ctx, stmt, id, u.Name, u.Link, hash, u.ExpiresAt).Scan(&createdAt)
-
 	if err != nil {
 		return model.Url{}, err
 	}
 
 	err = tx.Commit(ctx)
-
 	if err != nil {
 		return model.Url{}, err
 	}
@@ -83,13 +86,11 @@ func (app *Application) Insert(
 		CreatedAt: createdAt,
 		ExpiresAt: u.ExpiresAt,
 	}, nil
-
 }
 
 func (app *Application) GetHash(
 	hash string,
 ) (string, error) {
-
 	stmt := `SELECT link, expires_at FROM urls WHERE hash = $1`
 
 	var (
@@ -97,12 +98,11 @@ func (app *Application) GetHash(
 		expiresAt *time.Time
 	)
 
-	err := app.UrlModel.DB.QueryRow(
+	err := app.URLModel.DB.QueryRow(
 		context.Background(),
 		stmt,
 		hash,
 	).Scan(&link, &expiresAt)
-
 	if err != nil {
 		return "", err
 	}

@@ -29,7 +29,7 @@ func TestValidateURLCreate(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := validateUrlCreate(tt.input)
+			err := validateURLCreate(tt.input)
 			if tt.want == "" && err != nil {
 				t.Fatalf("validateUrlCreate returned %v", err)
 			}
@@ -44,7 +44,7 @@ func TestCreateShortURLRejectsMalformedPayload(t *testing.T) {
 	req := httptest.NewRequest(http.MethodPost, "/api/urls", strings.NewReader(`{"name":"Docs","link":"https://example.com","extra":true}`))
 	rec := httptest.NewRecorder()
 
-	CreateShortUrl(nil).ServeHTTP(rec, req)
+	CreateShortURL(nil).ServeHTTP(rec, req)
 
 	if rec.Code != http.StatusBadRequest {
 		t.Fatalf("status = %d, want %d", rec.Code, http.StatusBadRequest)

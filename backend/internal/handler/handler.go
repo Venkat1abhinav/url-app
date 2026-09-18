@@ -14,9 +14,8 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-func CreateShortUrl(app *Application) http.HandlerFunc {
+func CreateShortURL(app *Application) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-
 		var urlCreate model.UrlCreate
 
 		r.Body = http.MaxBytesReader(w, r.Body, 1<<20)
@@ -33,13 +32,12 @@ func CreateShortUrl(app *Application) http.HandlerFunc {
 
 		urlCreate.Name = strings.TrimSpace(urlCreate.Name)
 		urlCreate.Link = strings.TrimSpace(urlCreate.Link)
-		if err := validateUrlCreate(urlCreate); err != nil {
+		if err := validateURLCreate(urlCreate); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
 		url, err := app.Insert(urlCreate)
-
 		if err != nil {
 			log.Printf("create short URL: %v", err)
 			http.Error(w, "Could not create the short URL", http.StatusInternalServerError)
@@ -55,7 +53,7 @@ func CreateShortUrl(app *Application) http.HandlerFunc {
 	}
 }
 
-func RedirectUrl(app *Application) http.HandlerFunc {
+func RedirectURL(app *Application) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		hash := chi.URLParam(r, "hash")
 
@@ -74,7 +72,7 @@ func RedirectUrl(app *Application) http.HandlerFunc {
 	}
 }
 
-func validateUrlCreate(input model.UrlCreate) error {
+func validateURLCreate(input model.UrlCreate) error {
 	if input.Name == "" {
 		return errors.New("a link name is required")
 	}
