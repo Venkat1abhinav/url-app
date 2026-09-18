@@ -30,11 +30,22 @@ const createUrl = async (data: UrlCreate): Promise<Url> => {
     body: JSON.stringify(data),
   })
 
+  const body = await response.text()
+
   if (!response.ok) {
-    const message = await response.text()
+    const message = body
     throw new Error(message.trim() || `Request failed (${response.status})`)
   }
-  return response.json()
+
+  if (!body.trim()) {
+    throw new Error("The server created no response. Please try again.")
+  }
+
+  try {
+    return JSON.parse(body) as Url
+  } catch {
+    throw new Error("The server returned an invalid response. Please try again.")
+  }
 }
 
 const redirectUrl = (hash: string): string => {
