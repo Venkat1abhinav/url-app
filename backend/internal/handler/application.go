@@ -42,41 +42,28 @@ func (app *Application) Insert(
 	}
 	defer tx.Rollback(ctx)
 
-	var (
-		id        int64
-		createdAt time.Time
-	)
-
-	err = tx.QueryRow(
-		ctx,
-		`SELECT nextval('urls_id_seq')`,
-	).Scan(&id)
-
+	// Ask PostgreSQL for the next ID instead of depending on a particular
+	// sequence name. Sequence names differ across existing deployments and
+	// PostgreSQL may use an identity column rather than a serial sequence.
+	var id int64
+	err = tx.QueryRow(ctx, `SELECT nextval(pg_get_serial_sequence('urls', 'id'))`).Scan(&id)
 	if err != nil {
 		return model.Url{}, err
 	}
 
 	hash, err := service.ShortenURL(id)
-
 	if err != nil {
 		return model.Url{}, err
 	}
 
+	var createdAt time.Time
 	stmt := `
 		INSERT INTO urls (id, name, link, hash, expires_at)
 		VALUES ($1, $2, $3, $4, $5)
 		RETURNING created_at;
 	`
 
-	err = tx.QueryRow(
-		ctx,
-		stmt,
-		id,
-		u.Name,
-		u.Link,
-		hash,
-		u.ExpiresAt,
-	).Scan(&createdAt)
+	err = tx.QueryRow(ctx, stmt, id, u.Name, u.Link, hash, u.ExpiresAt).Scan(&createdAt)
 
 	if err != nil {
 		return model.Url{}, err
