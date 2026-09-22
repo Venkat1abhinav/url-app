@@ -25,7 +25,7 @@ const shortUrlBase = (
   import.meta.env.VITE_SHORT_URL_BASE ?? apiBase
 ).replace(/\/$/, "")
 
-const createUrl = async (data: UrlCreate): Promise<Url> => {
+export const createUrl = async (data: UrlCreate): Promise<Url> => {
   const response = await fetch(`${api}/urls`, {
     method: "POST",
     headers: {
@@ -53,8 +53,7 @@ const createUrl = async (data: UrlCreate): Promise<Url> => {
   }
 }
 
-const redirectUrl = (hash: string): string => {
+export const redirectUrl = (hash: string): string => {
   return `${shortUrlBase}/${hash}`
 }
 
-export { createUrl, redirectUrl }
